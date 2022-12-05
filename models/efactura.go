@@ -62,9 +62,7 @@ func (i *Invoice) HasDiscount() {
 
 func openUM() UnitatiMasura {
 	data, _ := ioutil.ReadFile("unitati.xml")
-
 	ds := UnitatiMasura{}
-
 	_ = xml.Unmarshal([]byte(data), &ds)
 	return ds
 }
