@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='https://www.w3.org/1999/xhtml'>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+<body style='font-family:Tahoma;font-size:12px;color: #333333;background-color:#FFFFFF;'>
+<table align='center' border='0' cellpadding='0' cellspacing='0' style='height:842px; width:595px;font-size:12px;'>
+  <tr>
+    <td valign='top'><table width='100%' cellspacing='0' cellpadding='0'>
+      </table><strong>Cumpărător:</strong> <br/><br/>
+      <table width='100%' cellspacing='0' cellpadding='0'>
+      <tr>
+        <td valign='top' width='55%' style='font-size:12px;'> <strong > {{ .invoice.AccountingCustomerParty.Party.PartyLegalEntity.RegistrationName}}</strong><br /> 
+Adresa: {{ .invoice.AccountingCustomerParty.Party.PostalAddress.StreetName}}, {{ .invoice.AccountingCustomerParty.Party.PostalAddress.CityName}}, {{ .invoice.AccountingCustomerParty.Party.PostalAddress.CountrySubentity}}, {{ .invoice.AccountingCustomerParty.Party.PostalAddress.Country.IdentificationCode}} 
+<br/>Reg. com.: {{ .invoice.AccountingCustomerParty.Party.PartyLegalEntity.CompanyID}}
+<br />CIF: {{ .invoice.AccountingCustomerParty.Party.PartyTaxScheme.CompanyID }}<br />
+
+</td>
+        <td valign='top' width='15%'>
+</td>
+        <td valign='top' width='30%' style='font-size:12px;'>Data facturii: {{ .invoice.IssueDate}}<br/>
+		Data scadentă: {{ .invoice.DueDate}} <br/>
+		
+		
+		</td>
+
+      </tr>
+    </table>
+    <table width='100%' height='100' cellspacing='0' cellpadding='0'>
+      <tr>
+        <td><div align='center' style='font-size: 14px;font-weight: bold;'>E-Factura {{ .invoice.ID}} {{if ne .invoice.OrderReference.ID ""}}<br/>Comanda: {{.invoice.OrderReference.ID}} {{end}} {{if ne .invoice.ContractDocumentReference.ID "" }}<br/>Contract: {{ .invoice.ContractDocumentReference.ID}} {{end}}</div></td>
+      </tr>
+    </table>
+    {{ $d := .invoice.WithDiscount}}
+<table width='100%' cellspacing='0' cellpadding='2' border='1' bordercolor='#CCCCCC'>
+      <tr>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>#</strong></td>
+        <td width='45%' bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Denumire Produsului sau a Serviciului</strong></td>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Cant.</strong></td>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>UM.</strong></td>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Moneda</strong></td>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Preț unitar</strong></td>
+        {{ if eq $d "1"}}
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Discount</strong></td>
+        {{ end}}
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Total</strong></td>
+        <td bordercolor='#ccc' bgcolor='#f2f2f2' style='font-size:12px;'><strong>Procent<br/>TVA</strong></td>
+  
+        </tr>
+      <tr style="display:none;"><td colspan="*">
+{{range $key, $line := .invoice.InvoiceLineNew}}
+<tr>
+    {{ $rand := inc $key}}
+    <td valign='top' style='font-size:12px;'>{{$rand}}</td>
+    <td valign='top' style='font-size:12px;'>{{$line.Item.Name}}<br/>{{ if ne $line.Item.Description ""}}<br/>Descriere:<br/>{{$line.Item.Description}}<br/>{{ end }}{{ if ne $line.Note "" }}<br/>Nota: {{$line.Note}}{{end}}</td>
+    <td valign='top' style='font-size:12px;'>{{$line.InvoicedQuantity.Text}} </td>
+    <td valign='top' style='font-size:12px;'>{{$line.UM}} </td>
+    <td valign='top' style='font-size:12px;'>{{$line.LineExtensionAmount.CurrencyID}} </td>
+    <td valign='top' style='font-size:12px;'>{{$line.Price.PriceAmount.Text}} </td>
+    {{ if eq $d "1"}}
+    <td style='font-size:12px;'>{{if eq $line.AllowanceCharge.Amount.Text ""}}0.00 {{else}}{{ $line.AllowanceCharge.Amount.Text }}{{end}}</td>
+    {{ end}}
+    <td valign='top' style='font-size:12px;'>{{$line.LineExtensionAmount.Text}} </td>
+    <td valign='top' style='font-size:12px;'>{{$line.Item.ClassifiedTaxCategory.Percent}}% </td>
+</tr>
+{{ end }}
+</td></tr>
+    </table>
+<table width='100%' cellspacing='0' cellpadding='2' border='0'>
+      <tr>
+        <td style='font-size:12px;width:50%;'><strong> </strong></td>
+        <td><table width='100%' cellspacing='0' cellpadding='2' border='0'>
+  <tr>
+<td align='right' style='font-size:12px;' >Total</td>
+    <td  align='right' style='font-size:12px;'>{{ .invoice.LegalMonetaryTotal.LineExtensionAmount.Text}} {{ .invoice.LegalMonetaryTotal.LineExtensionAmount.CurrencyID}}<td>
+  </tr>
+  <tr>
+    <td  align='right' style='font-size:12px;'>{{ .invoice.TaxTotal.TaxSubtotal.TaxCategory.TaxScheme.ID}}({{.invoice.TaxTotal.TaxSubtotal.TaxCategory.Percent}}%)</td>
+    <td  align='right' style='font-size:12px;'>{{ .invoice.TaxTotal.TaxSubtotal.TaxAmount.Text}} {{ .invoice.TaxTotal.TaxSubtotal.TaxAmount.CurrencyID }}</td>
+  </tr>
+  <tr>
+
+    <td  align='right' style='font-size:12px;'><b>Total de plata</b></td>
+    <td  align='right' style='font-size:12px;'><b>{{ .invoice.LegalMonetaryTotal.PayableAmount.Text}} {{ .invoice.LegalMonetaryTotal.PayableAmount.CurrencyID}}</b></td>
+  </tr></table>
+</td>
+      </tr>
+</table> 
+   
+   <table width='100%' height='50'><tr><td style='font-size:12px;text-align:justify;'><br /><br />
+<i>{{ .invoice.Note}}</i></td></tr></table>
+    <table  width='100%' cellspacing='0' cellpadding='2'>
+      <tr>
+        <td width='33%' style='border-top:double medium #CCCCCC;font-size:12px;' valign='top' ><b>{{ .invoice.AccountingSupplierParty.Party.PartyLegalEntity.RegistrationName}}</b><br/>
+Reg. com.:  {{ .invoice.AccountingSupplierParty.Party.PartyLegalEntity.CompanyID}}<br/>
+CIF: {{ .invoice.AccountingSupplierParty.Party.PartyTaxScheme.CompanyID }}<br />
+</td>
+        <td width='33%' style='border-top:double medium #CCCCCC; font-size:12px;' align='center' valign='top'>
+           Adresa:<br/> {{ .invoice.AccountingSupplierParty.Party.PostalAddress.StreetName}}, {{ .invoice.AccountingSupplierParty.Party.PostalAddress.CityName}}, {{ .invoice.AccountingSupplierParty.Party.PostalAddress.CountrySubentity}}, {{ .invoice.AccountingSupplierParty.Party.PostalAddress.Country.IdentificationCode}} <br/>
+Contact: {{ .invoice.AccountingSupplierParty.Party.Contact.Name }}<br/>
+</td>
+
+        <td valign='top' width='34%' style='border-top:double medium #CCCCCC;font-size:12px;' align='right'><!--[Nume Bancă]--><br/> CONT BANCAR: {{.invoice.PaymentMeans.PayeeFinancialAccount.ID}}  <br/><!--SWIFT / BIC: [SWIFT / BIC]--> <br/>     
+ </td>
+      </tr>
+    </table>
+</td>
+  </tr>
+</table>
+</body>
+</html>
